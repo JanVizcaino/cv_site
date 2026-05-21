@@ -1,27 +1,19 @@
 pipeline {
     agent any
-    
+
     stages {
         stage('Descargar código') {
             steps {
                 checkout scm
             }
         }
-        
-        stage('Construir Imagen JS') {
+
+        stage('Desplegar con Docker Compose') {
             steps {
-                // Entra en la carpeta api y crea la imagen Docker
                 dir('api') {
-                    sh 'docker build -t cv-api .'
+                    sh 'docker compose down || true'
+                    sh 'docker compose up -d --build'
                 }
-            }
-        }
-        
-        stage('Desplegar API Node') {
-            steps {
-                // Borra la versión anterior si existe, y arranca la nueva
-                sh 'docker rm -f cv-api-container || true'
-                sh 'docker run -d --name cv-api-container -p 3000:3000 cv-api'
             }
         }
     }

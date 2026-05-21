@@ -12,15 +12,26 @@ function getDbClients(db) {
   return { type: 'mysql', client: mariadb };
 }
 
-// GET /api/cv?db=mariadb&id=1
+// GET /api/cv?db=mariadb
 router.get('/', async (req, res) => {
-  return res.json({
-    id: 1,
-    nombre: "Jan Vizcaino",
-    profesion: "Desarrollador Full Stack & DevOps",
-    experiencia: "Despliegue automatizado con Jenkins y Docker superado con éxito.",
-    moreinfo: "Datos estáticos para la práctica de DevOps."
-  });
+  const db = (req.query.db || 'mariadb').toLowerCase();
+  const { type, client } = getDbClients(db);
+
+  try {
+    let row;
+    if (type === 'mysql') {
+      const [rows] = await client.execute('SELECT * FROM cv_info LIMIT 1');
+      row = rows[0];
+    } else {
+      const result = await client.query('SELECT * FROM cv_info LIMIT 1');
+      row = result.rows[0];
+    }
+    if (!row) return res.status(404).json({ error: 'No hay datos en la BD' });
+    return res.json(row);
+  } catch (err) {
+    console.error(err);
+    return res.status(500).json({ error: 'Error de base de datos' });
+  }
 });
 
 // PUT /api/cv/:id   body: { db: 'mariadb'|'postgres', moreinfo: 'texto...' }

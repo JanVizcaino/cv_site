@@ -1,5 +1,4 @@
-// CVCard.jsx
-const PROFILE_IMAGE = "https://ik.imagekit.io/ia0ln3twn/Gemini_Generated_Image_ji9238ji9238ji92.png";
+const PROFILE_IMAGE = "https://ik.imagekit.io/ia0ln3twn/Gemini_Generated_Image_ji9238ji9238ji92.png?tr=w-300,h-300,c-maintain_ratio,f-webp,q-80";
 
 export default function CVCard({ cv, onShowMore }) {
   if (!cv) return null;
@@ -22,7 +21,7 @@ export default function CVCard({ cv, onShowMore }) {
 
       <button
         className="mt-3 bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700"
-        onClick={onShowMore}
+        onClick={onShowMore}º
       >
         Ver más detalles
       </button>

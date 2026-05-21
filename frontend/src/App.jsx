@@ -13,7 +13,9 @@ function App() {
 const fetchCV = async () => {
   setLoading(true);
   try {
-    const res = await fetch(`http://localhost:3000/api/cv?db=${dbChoice}`);
+    const res = await fetch(`https://overrich-etha-unexported.ngrok-free.dev/api/cv?db=${dbChoice}`, {
+      headers: { 'ngrok-skip-browser-warning': 'true' }
+    });
     const text = await res.text(); // <-- leer como texto
     console.log("Respuesta cruda de la API:", text);
 

@@ -8,12 +8,45 @@ pipeline {
             }
         }
 
-        stage('Desplegar con Docker Compose') {
+        stage('Preparar red Docker') {
+            steps {
+                sh 'docker network create cv-net || true'
+            }
+        }
+
+        stage('Levantar MariaDB') {
+            steps {
+                sh 'docker rm -f cv-mariadb || true'
+                sh '''docker run -d \
+                    --name cv-mariadb \
+                    --network cv-net \
+                    -e MYSQL_ROOT_PASSWORD=rootpass \
+                    -e MYSQL_DATABASE=cv_db \
+                    -e MYSQL_USER=cv_user \
+                    -e MYSQL_PASSWORD=password \
+                    -v mariadb_data:/var/lib/mysql \
+                    -v $WORKSPACE/api/db/init.sql:/docker-entrypoint-initdb.d/init.sql \
+                    mariadb:10.11'''
+                sh 'until docker exec cv-mariadb mysqladmin ping -u cv_user -pcv_user --silent 2>/dev/null; do sleep 3; done'
+            }
+        }
+
+        stage('Construir y desplegar API') {
             steps {
                 dir('api') {
-                    sh 'docker-compose down || true'
-                    sh 'docker-compose up -d --build'
+                    sh 'docker build -t cv-api .'
                 }
+                sh 'docker rm -f cv-api-container || true'
+                sh '''docker run -d \
+                    --name cv-api-container \
+                    --network cv-net \
+                    -p 3000:3000 \
+                    -e MARIADB_HOST=cv-mariadb \
+                    -e MARIADB_USER=cv_user \
+                    -e MARIADB_PASSWORD=password \
+                    -e MARIADB_DATABASE=cv_db \
+                    -e MARIADB_PORT=3306 \
+                    cv-api'''
             }
         }
     }

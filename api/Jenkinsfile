@@ -8,21 +8,20 @@ pipeline {
             }
         }
         
-        stage('Instalar Dependencias JS') {
+        stage('Construir Imagen JS') {
             steps {
-                // Instala las dependencias de Node
-                sh 'npm install'
+                // Entra en la carpeta api y crea la imagen Docker
+                dir('api') {
+                    sh 'docker build -t cv-api .'
+                }
             }
         }
         
         stage('Desplegar API Node') {
             steps {
-                // Copia los archivos a una carpeta de despliegue en la Pi
-                // (Creamos una carpeta /opt/cv-api/ previamente)
-                sh 'sudo rsync -av --exclude "node_modules" . /opt/cv-api/'
-                
-                // Reinicia o arranca la API con PM2
-                sh 'cd /opt/cv-api && pm2 restart cv-api || pm2 start server.js --name "cv-api"'
+                // Borra la versión anterior si existe, y arranca la nueva
+                sh 'docker rm -f cv-api-container || true'
+                sh 'docker run -d --name cv-api-container -p 3000:3000 cv-api'
             }
         }
     }

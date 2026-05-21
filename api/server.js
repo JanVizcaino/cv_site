@@ -13,5 +13,5 @@ app.use('/api/cv', cvRoutes);
 
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
-  console.log(`API corriendo en http://localhost:${PORT}`);
+  console.log(`API corriendo correctamente en http://localhost:${PORT}`);
 });

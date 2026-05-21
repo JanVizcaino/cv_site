@@ -1,0 +1,29 @@
+pipeline {
+    agent any
+    
+    stages {
+        stage('Descargar código') {
+            steps {
+                checkout scm
+            }
+        }
+        
+        stage('Instalar Dependencias JS') {
+            steps {
+                // Instala las dependencias de Node
+                sh 'npm install'
+            }
+        }
+        
+        stage('Desplegar API Node') {
+            steps {
+                // Copia los archivos a una carpeta de despliegue en la Pi
+                // (Creamos una carpeta /opt/cv-api/ previamente)
+                sh 'sudo rsync -av --exclude "node_modules" . /opt/cv-api/'
+                
+                // Reinicia o arranca la API con PM2
+                sh 'cd /opt/cv-api && pm2 restart cv-api || pm2 start server.js --name "cv-api"'
+            }
+        }
+    }
+}
